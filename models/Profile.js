@@ -66,7 +66,7 @@ const ProfileSchema = new mongoose.Schema({
       },
       fieldofstudy: {
         type: String,
-        required: TextTrackCue,
+        required: true,
       },
       from: {
         type: Date,
