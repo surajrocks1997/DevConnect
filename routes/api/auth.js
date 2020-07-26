@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const bcrypt = require("bcryptjs");
 const { check, validationResult } = require("express-validator");
+const axios = require("axios");
 
 const auth = require("../../middleware/auth");
 const User = require("../../models/User");
@@ -20,6 +21,52 @@ router.get("/", auth, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+router.get("/movies/:year", async (req, res) => {
+    const year = req.params.year;
+    const response = await axios.get("https://jsonmock.hackerrank.com/api/movies?Year=" + year);
+
+    const data = response.data.data;
+    const arr = [];
+
+    data.map(myData => {
+      // console.log(myData.Title);
+      arr.push(myData.Title);
+    })
+
+    // console.log(arr);
+    console.log(arr.join("\n"));
+    res.status(201).json({ msg: "Running" });
+
+});
+
+router.get("/movies/name/:str", async(req, res) => {
+  const str = req.params.str;
+  const response = await axios.get("https://jsonmock.hackerrank.com/api/movies/search/?Title=" + str);
+
+  const myData = response.data;
+  const arr = [];
+  myData.data.map(data => {
+    arr.push(data.Title);
+  })
+  
+  if(myData.total_pages > 1) {
+    for(let i=2; i<= myData.total_pages; i++){
+      const newRes = await axios.get("https://jsonmock.hackerrank.com/api/movies/search/?Title=" + str + "&page=" + i);
+
+      const newPageData = newRes.data;
+      newPageData.data.map(data => {
+        arr.push(data.Title);
+      })
+    }
+  }
+
+  const sorted = arr.sort();
+  console.log(sorted.join("\n"));
+  
+  res.status(201).json({ msg: "Running!!" });
+
+})
 
 // @route   POST    api/auth
 // @desc    Authenticate User and Get Token
